@@ -1,435 +1,9 @@
-<!doctype html>
-<html lang="pl">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pomidor Pro v2.2</title>
-  <style>
-    :root{
-      --bg0:#0b0f14;
-      --bg1:#0f1722;
-      --card: rgba(255,255,255,.06);
-      --stroke: rgba(255,255,255,.12);
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.64);
-      --accent: #ff4d4d;
-      --shadow: 0 24px 70px rgba(0,0,0,.55);
-      --radius: 22px;
-      --ring: 320px;
-    }
+import { createPipRenderer, getPiPCanvas } from "./modules/pipRenderer.js";
+import { setupPWAInstallUI, registerServiceWorker } from "./modules/pwa.js";
 
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
-
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      color: var(--text);
-      background:
-        radial-gradient(1200px 700px at 20% 10%, rgba(255,77,77,.18), transparent 55%),
-        radial-gradient(900px 600px at 80% 20%, rgba(90,160,255,.12), transparent 60%),
-        radial-gradient(900px 700px at 50% 90%, rgba(170,90,255,.12), transparent 60%),
-        linear-gradient(180deg, var(--bg0), var(--bg1));
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding: 22px;
-    }
-
-    .wrap{
-      width:min(920px, 100%);
-      display:grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap: 18px;
-    }
-    @media (max-width: 880px){
-      .wrap{ grid-template-columns: 1fr; }
-    }
-
-    .card{
-      background: var(--card);
-      border: 1px solid var(--stroke);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(14px);
-      overflow:hidden;
-    }
-
-    .main{ padding: 22px 22px 18px; }
-    .topbar{
-      display:flex; align-items:center; justify-content:space-between;
-      gap: 12px; margin-bottom: 10px;
-    }
-    .brand{ display:flex; align-items:center; gap: 10px; }
-    .logoDot{
-      width: 12px; height: 12px; border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 0 6px rgba(255,77,77,.18);
-    }
-    .title{
-      font-size: 15px; letter-spacing:.2px; font-weight: 650; margin:0; line-height: 1.1;
-    }
-    .subtitle{
-      margin:0; font-size: 12px; color: var(--muted); line-height: 1.1;
-    }
-
-    .chipRow{
-      display:flex; gap: 8px; flex-wrap:wrap; justify-content:flex-end;
-    }
-    .chip{
-      font-size: 12px; padding: 8px 10px; border-radius: 999px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid var(--stroke);
-      color: var(--muted);
-      user-select:none;
-    }
-    .chip strong{ color: var(--text); font-weight: 650; }
-
-    .dial{ display:grid; place-items:center; margin: 10px 0 8px; }
-    .dialBox{
-      width: var(--ring); height: var(--ring);
-      position:relative; display:grid; place-items:center;
-      border-radius: 999px;
-    }
-    canvas#dial{
-      width: var(--ring); height: var(--ring);
-      display:block; border-radius: 999px;
-    }
-    .center{
-      position:absolute; inset: 0;
-      display:grid; place-items:center;
-      text-align:center; padding: 22px;
-      pointer-events:none;
-    }
-    .phase{
-      font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: 8px;
-    }
-    .time{
-      font-variant-numeric: tabular-nums;
-      font-size: 64px; font-weight: 750; line-height: 1.0;
-      letter-spacing: -0.02em;
-    }
-    .meta{
-      margin-top: 10px; font-size: 13px; color: var(--muted);
-      display:flex; align-items:center; justify-content:center;
-      gap: 10px; flex-wrap:wrap;
-    }
-    .pill{
-      padding: 7px 10px; border-radius: 999px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid var(--stroke);
-      color: var(--muted);
-    }
-
-    .controls{
-      display:flex; gap: 10px; flex-wrap:wrap;
-      justify-content:center; margin-top: 10px;
-    }
-    button{
-      appearance:none; border: 0; cursor:pointer;
-      border-radius: 14px; padding: 11px 14px;
-      font-weight: 650; letter-spacing:.2px;
-      color: var(--text);
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.10);
-      transition: transform .06s ease, background .2s ease, border-color .2s ease;
-      min-width: 112px;
-    }
-    button:hover{ background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.16); }
-    button:active{ transform: translateY(1px); }
-
-    .primary{
-      background: linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
-      border-color: rgba(255,255,255,.14);
-      min-width: 170px;
-      position:relative; overflow:hidden;
-    }
-    .primary::before{
-      content:""; position:absolute; inset:-2px;
-      background: radial-gradient(400px 120px at 20% 20%, rgba(255,255,255,.24), transparent 60%);
-      opacity:.9; pointer-events:none;
-    }
-    .primary .dot{
-      width: 8px; height: 8px; border-radius: 999px;
-      background: var(--accent); display:inline-block;
-      margin-right: 8px; box-shadow: 0 0 0 6px rgba(255,77,77,.16);
-      vertical-align: middle;
-    }
-    .danger{
-      background: rgba(255,77,77,.12);
-      border-color: rgba(255,77,77,.22);
-    }
-
-    .side{ padding: 18px; }
-    .side h2{
-      margin: 2px 0 10px;
-      font-size: 14px; font-weight: 750; letter-spacing:.2px;
-    }
-
-    .row{
-      display:grid; grid-template-columns: 1fr 1fr; gap: 10px;
-      margin-bottom: 12px;
-    }
-    .field{
-      background: rgba(255,255,255,.05);
-      border: 1px solid var(--stroke);
-      border-radius: 16px;
-      padding: 12px;
-    }
-    .label{
-      font-size: 12px; color: var(--muted);
-      margin-bottom: 8px;
-      display:flex; justify-content:space-between; gap: 10px;
-    }
-
-    select, input[type="number"], input[type="range"]{
-      width: 100%;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.24);
-      color: var(--text);
-      padding: 10px 10px;
-      outline: none;
-      font-size: 14px;
-    }
-    input[type="range"]{ padding: 8px 0; }
-    input[type="color"]{
-      width: 100%;
-      height: 42px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.24);
-      padding: 6px;
-      cursor:pointer;
-    }
-
-    .toggle{
-      display:flex; align-items:center; justify-content:space-between;
-      gap: 12px; padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,.05);
-      margin-top: 10px;
-    }
-    .toggle span{ color: var(--muted); font-size: 13px; }
-    .toggle input{ width: 46px; height: 24px; }
-
-    .stats{
-      margin-top: 12px;
-      display:grid; grid-template-columns: 1fr 1fr; gap: 10px;
-    }
-    .stat{
-      background: rgba(255,255,255,.05);
-      border: 1px solid var(--stroke);
-      border-radius: 16px;
-      padding: 12px;
-    }
-    .stat .k{ font-size: 12px; color: var(--muted); }
-    .stat .v{ font-size: 20px; font-weight: 750; margin-top: 6px; }
-
-    .hint{
-      margin-top: 10px;
-      font-size: 12px;
-      color: rgba(255,255,255,.55);
-      line-height: 1.35;
-    }
-
-    /* Focus mode — klasa na body */
-    body.focusMode{ padding: 0; }
-    body.focusMode .side{ display:none; }
-    body.focusMode .wrap{
-      width: 100%;
-      height: 100%;
-      grid-template-columns: 1fr;
-      gap: 0;
-    }
-    body.focusMode .card.main{
-      border-radius: 0;
-      height: 100%;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-    }
-
-    /* PiP video must not be display:none */
-    #pipVideo{
-      position: fixed;
-      left: -9999px;
-      top: -9999px;
-      width: 1px;
-      height: 1px;
-      opacity: 0.0001;
-      pointer-events:none;
-    }
-
-    #pipCanvas{
-      position: fixed;
-      left: -9999px;
-      top: -9999px;
-      width: 1px;
-      height: 1px;
-      opacity: 0.0001;
-      pointer-events:none;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="wrap" id="root">
-    <section class="card main">
-      <div class="topbar">
-        <div class="brand">
-          <div class="logoDot"></div>
-          <div>
-            <p class="title">Pomidor Pro</p>
-            <p class="subtitle">focus timer, sensownie zrobiony</p>
-          </div>
-        </div>
-        <div class="chipRow">
-          <div class="chip"><strong id="chipMode">Pomodoro</strong></div>
-          <div class="chip"><span id="chipPlan">25/5/15 • long co 4</span></div>
-        </div>
-      </div>
-
-      <div class="dial">
-        <div class="dialBox">
-          <canvas id="dial" width="720" height="720"></canvas>
-          <div class="center">
-            <div>
-              <div class="phase" id="phaseLabel">WORK</div>
-              <div class="time" id="time">25:00</div>
-              <div class="meta">
-                <span class="pill" id="metaLeft">Pozostało: 25:00</span>
-                <span class="pill" id="metaRight">Sesje dziś: <strong id="sessionsToday" style="color:var(--text)">0</strong></span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="controls">
-          <button type="button" class="primary" id="btnStartPause"><span class="dot"></span><span id="btnStartPauseTxt">Start</span></button>
-          <button type="button" id="btnReset" class="danger">Reset</button>
-          <button type="button" id="btnSkip">Skip</button>
-          <button type="button" id="btnFocus">Focus</button>
-          <button type="button" id="btnPiP">PiP</button>
-        </div>
-
-        <div class="hint">
-          Skróty: <strong>Spacja</strong> start/pause • <strong>R</strong> reset • <strong>N</strong> skip • <strong>F</strong> focus • <strong>P</strong> PiP
-        </div>
-      </div>
-    </section>
-
-    <aside class="card side">
-      <h2>Ustawienia</h2>
-
-      <div class="row">
-        <div class="field">
-          <div class="label"><span>Tryb</span></div>
-          <select id="mode">
-            <option value="pomodoro">Pomodoro (cykl)</option>
-            <option value="countdown">Odliczanie</option>
-            <option value="countup">Timer w górę</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <div class="label"><span>Akcent</span></div>
-          <input id="accent" type="color" value="#ff4d4d" />
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="field">
-          <div class="label"><span>Praca (min)</span></div>
-          <input id="workMin" type="number" min="1" max="180" value="25" />
-        </div>
-        <div class="field">
-          <div class="label"><span>Krótka przerwa (min)</span></div>
-          <input id="shortMin" type="number" min="1" max="60" value="5" />
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="field">
-          <div class="label"><span>Długa przerwa (min)</span></div>
-          <input id="longMin" type="number" min="1" max="90" value="15" />
-        </div>
-        <div class="field">
-          <div class="label"><span>Długa co (sesji)</span></div>
-          <input id="longEvery" type="number" min="2" max="10" value="4" />
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="field">
-          <div class="label"><span>Countdown (min)</span></div>
-          <input id="countdownMin" type="number" min="1" max="999" value="25" />
-        </div>
-        <div class="field">
-          <div class="label"><span>Target (min)</span></div>
-          <input id="countupTargetMin" type="number" min="0" max="999" value="0" />
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="field">
-          <div class="label">
-            <span>PiP – widok</span>
-            <span style="color:var(--muted)">restart PiP po zmianie</span>
-          </div>
-          <select id="pipView">
-            <option value="ring">Ring (jak w apce)</option>
-            <option value="digits">Cyfry (minimal)</option>
-          </select>
-        </div>
-        <div class="field">
-          <div class="label"><span>PiP – kolor cyfr</span></div>
-          <input id="pipDigitsColor" type="color" value="#ffffff" />
-        </div>
-      </div>
-
-      <div class="field" style="margin-bottom:12px;">
-        <div class="label">
-          <span>Głośność beep</span>
-          <span id="volVal" style="color:var(--muted)">60%</span>
-        </div>
-        <input id="volume" type="range" min="0" max="100" value="60" />
-        <div class="toggle">
-          <span>Auto-start następnej fazy</span>
-          <input id="autoStart" type="checkbox" checked />
-        </div>
-        <div class="toggle">
-          <span>Powiadomienia systemowe</span>
-          <input id="notify" type="checkbox" />
-        </div>
-      </div>
-
-      <div class="stats">
-        <div class="stat">
-          <div class="k">Sesje (praca) dziś</div>
-          <div class="v" id="statSessions">0</div>
-        </div>
-        <div class="stat">
-          <div class="k">Minuty focus dziś</div>
-          <div class="v" id="statMinutes">0</div>
-        </div>
-      </div>
-
-      <div class="hint">
-        Jeśli masz zaznaczone powiadomienia i permission jest „default”, poproszę o zgodę przy pierwszym starcie (user gesture),
-        a nie na koniec sesji.
-      </div>
-    </aside>
-  </div>
-
-  <video id="pipVideo" muted playsinline></video>
-  <canvas id="pipCanvas" width="800" height="450"></canvas>
-
-<script>
 (() => {
   const STORAGE_KEY = "pomidor_pro_v2_2";
+  const INSTALL_HIDDEN_KEY = "pomidor_pro_install_hidden";
   const todayKey = () => {
     const d = new Date();
     const mm = String(d.getMonth()+1).padStart(2,'0');
@@ -506,6 +80,10 @@
 
     pipVideo: document.getElementById("pipVideo"),
     pipCanvas: document.getElementById("pipCanvas"),
+
+    installBox: document.getElementById("installBox"),
+    btnInstall: document.getElementById("btnInstall"),
+    iosInstallHint: document.getElementById("iosInstallHint"),
   };
 
   const state = {
@@ -522,7 +100,10 @@
     phaseName: "WORK",
 
     lastShownSec: null,
-    spaceDown: false
+    spaceDown: false,
+
+    deferredInstallPrompt: null,
+    installUiLockedHidden: false
   };
 
   function ensureTodayStats() {
@@ -646,71 +227,11 @@
     ctx.restore();
   }
 
-  // ------- PiP digits canvas -------
-  const pipCtx = el.pipCanvas.getContext("2d");
-  function roundRect(c, x, y, w, h, r){
-    const rr = Math.min(r, w/2, h/2);
-    c.beginPath();
-    c.moveTo(x+rr, y);
-    c.arcTo(x+w, y, x+w, y+h, rr);
-    c.arcTo(x+w, y+h, x, y+h, rr);
-    c.arcTo(x, y+h, x, y, rr);
-    c.arcTo(x, y, x+w, y, rr);
-    c.closePath();
-  }
-
-  function drawPipDigits(displayText, phaseText, subText){
-    const w = el.pipCanvas.width, h = el.pipCanvas.height;
-    pipCtx.clearRect(0,0,w,h);
-
-    const bg = pipCtx.createLinearGradient(0,0,w,h);
-    bg.addColorStop(0, "rgba(10,14,20,0.98)");
-    bg.addColorStop(1, "rgba(18,24,34,0.98)");
-    pipCtx.fillStyle = bg;
-    pipCtx.fillRect(0,0,w,h);
-
-    pipCtx.save();
-    pipCtx.globalAlpha = 0.18;
-    pipCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#ff4d4d";
-    pipCtx.beginPath();
-    pipCtx.ellipse(w*0.25, h*0.20, w*0.35, h*0.28, 0, 0, Math.PI*2);
-    pipCtx.fill();
-    pipCtx.restore();
-
-    pipCtx.save();
-    pipCtx.globalAlpha = 0.92;
-    pipCtx.fillStyle = "rgba(255,255,255,0.06)";
-    pipCtx.strokeStyle = "rgba(255,255,255,0.10)";
-    pipCtx.lineWidth = 2;
-    roundRect(pipCtx, 44, 44, w-88, h-88, 28);
-    pipCtx.fill();
-    pipCtx.stroke();
-    pipCtx.restore();
-
-    const digitsColor = cfg.pipDigitsColor || "#ffffff";
-
-    pipCtx.save();
-    pipCtx.fillStyle = "rgba(255,255,255,0.62)";
-    pipCtx.font = "700 26px ui-sans-serif, system-ui";
-    pipCtx.textAlign = "center";
-    pipCtx.fillText(phaseText, w/2, 120);
-    pipCtx.restore();
-
-    pipCtx.save();
-    pipCtx.fillStyle = digitsColor;
-    pipCtx.font = "800 120px ui-sans-serif, system-ui";
-    pipCtx.textAlign = "center";
-    pipCtx.textBaseline = "middle";
-    pipCtx.fillText(displayText, w/2, h/2);
-    pipCtx.restore();
-
-    pipCtx.save();
-    pipCtx.fillStyle = "rgba(255,255,255,0.62)";
-    pipCtx.font = "650 22px ui-sans-serif, system-ui";
-    pipCtx.textAlign = "center";
-    pipCtx.fillText(subText, w/2, h - 96);
-    pipCtx.restore();
-  }
+  const pipRenderer = createPipRenderer({
+    canvas: el.pipCanvas,
+    getAccent: () => getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#ff4d4d",
+    getDigitsColor: () => cfg.pipDigitsColor || "#ffffff"
+  });
 
   function applyModeUI() {
     el.chipMode.textContent =
@@ -864,7 +385,8 @@
 
     drawDial(progress);
 
-    if ((cfg.pipView || "ring") === "digits") {
+    const pipView = cfg.pipView || "ring";
+    if (pipView === "digits" || pipView === "both") {
       const display = fmt(displaySec);
       const phase = (cfg.mode === "pomodoro")
         ? (state.phaseType === "work" ? "WORK" : "BREAK")
@@ -872,7 +394,9 @@
       const sub = cfg.mode === "countup"
         ? (state.target > 0 ? `Target: ${fmt(state.target)}` : "Brak targetu")
         : `Tryb: ${cfg.mode === "pomodoro" ? (state.phaseType === "work" ? "Focus" : "Break") : "Countdown"}`;
-      drawPipDigits(display, phase, sub);
+
+      if (pipView === "both") pipRenderer.drawRingAndDigits(progress, display, phase, sub);
+      else pipRenderer.drawDigits(display, phase, sub);
     }
   }
 
@@ -916,7 +440,7 @@
         return;
       }
       const view = cfg.pipView || "ring";
-      const srcCanvas = (view === "digits") ? el.pipCanvas : el.canvas;
+      const srcCanvas = getPiPCanvas(view, el.canvas, el.pipCanvas);
 
       if (!srcCanvas.captureStream) {
         alert("PiP: brak wsparcia canvas.captureStream(). Spróbuj Chrome/Edge.");
@@ -1081,6 +605,14 @@
     updateStatsUI();
     resetPhaseFromConfig();
     bind();
+    setupPWAInstallUI({
+      installBox: el.installBox,
+      btnInstall: el.btnInstall,
+      iosInstallHint: el.iosInstallHint,
+      state,
+      installHiddenKey: INSTALL_HIDDEN_KEY
+    });
+    registerServiceWorker();
     render(true);
 
     // if notify is ON but permission is default, don't prompt now; we'll prompt on Start (gesture)
@@ -1088,6 +620,3 @@
 
   init();
 })();
-</script>
-</body>
-</html>

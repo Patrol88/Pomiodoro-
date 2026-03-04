@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0f14" />
+  <link rel="manifest" href="manifest.json" />
+  <title>Pomidor Pro v2.2</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+
+<body>
+  <div class="wrap" id="root">
+    <section class="card main">
+      <div class="topbar">
+        <div class="brand">
+          <div class="logoDot"></div>
+          <div>
+            <p class="title">Pomidor Pro</p>
+            <p class="subtitle">focus timer, sensownie zrobiony</p>
+          </div>
+        </div>
+        <div class="chipRow">
+          <div class="chip"><strong id="chipMode">Pomodoro</strong></div>
+          <div class="chip"><span id="chipPlan">25/5/15 • long co 4</span></div>
+        </div>
+      </div>
+
+      <div class="dial">
+        <div class="dialBox">
+          <canvas id="dial" width="720" height="720"></canvas>
+          <div class="center">
+            <div>
+              <div class="phase" id="phaseLabel">WORK</div>
+              <div class="time" id="time">25:00</div>
+              <div class="meta">
+                <span class="pill" id="metaLeft">Pozostało: 25:00</span>
+                <span class="pill" id="metaRight">Sesje dziś: <strong id="sessionsToday" style="color:var(--text)">0</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button type="button" class="primary" id="btnStartPause"><span class="dot"></span><span id="btnStartPauseTxt">Start</span></button>
+          <button type="button" id="btnReset" class="danger">Reset</button>
+          <button type="button" id="btnSkip">Skip</button>
+          <button type="button" id="btnFocus">Focus</button>
+          <button type="button" id="btnPiP">PiP</button>
+        </div>
+
+        <div class="hint">
+          Skróty: <strong>Spacja</strong> start/pause • <strong>R</strong> reset • <strong>N</strong> skip • <strong>F</strong> focus • <strong>P</strong> PiP
+        </div>
+      </div>
+    </section>
+
+    <aside class="card side">
+      <h2>Ustawienia</h2>
+
+      <div class="row">
+        <div class="field">
+          <div class="label"><span>Tryb</span></div>
+          <select id="mode">
+            <option value="pomodoro">Pomodoro (cykl)</option>
+            <option value="countdown">Odliczanie</option>
+            <option value="countup">Timer w górę</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <div class="label"><span>Akcent</span></div>
+          <input id="accent" type="color" value="#ff4d4d" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <div class="label"><span>Praca (min)</span></div>
+          <input id="workMin" type="number" min="1" max="180" value="25" />
+        </div>
+        <div class="field">
+          <div class="label"><span>Krótka przerwa (min)</span></div>
+          <input id="shortMin" type="number" min="1" max="60" value="5" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <div class="label"><span>Długa przerwa (min)</span></div>
+          <input id="longMin" type="number" min="1" max="90" value="15" />
+        </div>
+        <div class="field">
+          <div class="label"><span>Długa co (sesji)</span></div>
+          <input id="longEvery" type="number" min="2" max="10" value="4" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <div class="label"><span>Countdown (min)</span></div>
+          <input id="countdownMin" type="number" min="1" max="999" value="25" />
+        </div>
+        <div class="field">
+          <div class="label"><span>Target (min)</span></div>
+          <input id="countupTargetMin" type="number" min="0" max="999" value="0" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <div class="label">
+            <span>PiP – widok</span>
+            <span style="color:var(--muted)">restart PiP po zmianie</span>
+          </div>
+          <select id="pipView">
+            <option value="ring">Ring (jak w apce)</option>
+            <option value="digits">Cyfry (minimal)</option>
+            <option value="both">Ring + cyfry</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="label"><span>PiP – kolor cyfr</span></div>
+          <input id="pipDigitsColor" type="color" value="#ffffff" />
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:12px;">
+        <div class="label">
+          <span>Głośność beep</span>
+          <span id="volVal" style="color:var(--muted)">60%</span>
+        </div>
+        <input id="volume" type="range" min="0" max="100" value="60" />
+        <div class="toggle">
+          <span>Auto-start następnej fazy</span>
+          <input id="autoStart" type="checkbox" checked />
+        </div>
+        <div class="toggle">
+          <span>Powiadomienia systemowe</span>
+          <input id="notify" type="checkbox" />
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="k">Sesje (praca) dziś</div>
+          <div class="v" id="statSessions">0</div>
+        </div>
+        <div class="stat">
+          <div class="k">Minuty focus dziś</div>
+          <div class="v" id="statMinutes">0</div>
+        </div>
+      </div>
+
+
+      <div class="field installBox" id="installBox" hidden>
+        <div class="label"><span>Zainstaluj aplikację</span></div>
+        <button type="button" id="btnInstall">Install app</button>
+        <div class="hint" id="iosInstallHint" hidden>
+          Na iOS: Safari → Udostępnij → „Do ekranu początkowego”.
+        </div>
+      </div>
+      <div class="hint">
+        Jeśli masz zaznaczone powiadomienia i permission jest „default”, poproszę o zgodę przy pierwszym starcie (user gesture),
+        a nie na koniec sesji.
+      </div>
+    </aside>
+  </div>
+
+  <video id="pipVideo" muted playsinline></video>
+  <canvas id="pipCanvas" width="800" height="450"></canvas>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

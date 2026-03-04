@@ -1,0 +1,295 @@
+    :root{
+      --bg0:#0b0f14;
+      --bg1:#0f1722;
+      --card: rgba(255,255,255,.06);
+      --stroke: rgba(255,255,255,.12);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.64);
+      --accent: #ff4d4d;
+      --shadow: 0 24px 70px rgba(0,0,0,.55);
+      --radius: 22px;
+      --ring: 320px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 700px at 20% 10%, rgba(255,77,77,.18), transparent 55%),
+        radial-gradient(900px 600px at 80% 20%, rgba(90,160,255,.12), transparent 60%),
+        radial-gradient(900px 700px at 50% 90%, rgba(170,90,255,.12), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 22px;
+    }
+
+    .wrap{
+      width:min(920px, 100%);
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 18px;
+    }
+    @media (max-width: 880px){
+      .wrap{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      overflow:hidden;
+    }
+
+    .main{ padding: 22px 22px 18px; }
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between;
+      gap: 12px; margin-bottom: 10px;
+    }
+    .brand{ display:flex; align-items:center; gap: 10px; }
+    .logoDot{
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(255,77,77,.18);
+    }
+    .title{
+      font-size: 15px; letter-spacing:.2px; font-weight: 650; margin:0; line-height: 1.1;
+    }
+    .subtitle{
+      margin:0; font-size: 12px; color: var(--muted); line-height: 1.1;
+    }
+
+    .chipRow{
+      display:flex; gap: 8px; flex-wrap:wrap; justify-content:flex-end;
+    }
+    .chip{
+      font-size: 12px; padding: 8px 10px; border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--stroke);
+      color: var(--muted);
+      user-select:none;
+    }
+    .chip strong{ color: var(--text); font-weight: 650; }
+
+    .dial{ display:grid; place-items:center; margin: 10px 0 8px; }
+    .dialBox{
+      width: var(--ring); height: var(--ring);
+      position:relative; display:grid; place-items:center;
+      border-radius: 999px;
+    }
+    canvas#dial{
+      width: var(--ring); height: var(--ring);
+      display:block; border-radius: 999px;
+    }
+    .center{
+      position:absolute; inset: 0;
+      display:grid; place-items:center;
+      text-align:center; padding: 22px;
+      pointer-events:none;
+    }
+    .phase{
+      font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 8px;
+    }
+    .time{
+      font-variant-numeric: tabular-nums;
+      font-size: 64px; font-weight: 750; line-height: 1.0;
+      letter-spacing: -0.02em;
+    }
+    .meta{
+      margin-top: 10px; font-size: 13px; color: var(--muted);
+      display:flex; align-items:center; justify-content:center;
+      gap: 10px; flex-wrap:wrap;
+    }
+    .pill{
+      padding: 7px 10px; border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--stroke);
+      color: var(--muted);
+    }
+
+    .controls{
+      display:flex; gap: 10px; flex-wrap:wrap;
+      justify-content:center; margin-top: 10px;
+    }
+    button{
+      appearance:none; border: 0; cursor:pointer;
+      border-radius: 14px; padding: 11px 14px;
+      font-weight: 650; letter-spacing:.2px;
+      color: var(--text);
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.10);
+      transition: transform .06s ease, background .2s ease, border-color .2s ease;
+      min-width: 112px;
+    }
+    button:hover{ background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.16); }
+    button:active{ transform: translateY(1px); }
+
+    .primary{
+      background: linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+      border-color: rgba(255,255,255,.14);
+      min-width: 170px;
+      position:relative; overflow:hidden;
+    }
+    .primary::before{
+      content:""; position:absolute; inset:-2px;
+      background: radial-gradient(400px 120px at 20% 20%, rgba(255,255,255,.24), transparent 60%);
+      opacity:.9; pointer-events:none;
+    }
+    .primary .dot{
+      width: 8px; height: 8px; border-radius: 999px;
+      background: var(--accent); display:inline-block;
+      margin-right: 8px; box-shadow: 0 0 0 6px rgba(255,77,77,.16);
+      vertical-align: middle;
+    }
+    .danger{
+      background: rgba(255,77,77,.12);
+      border-color: rgba(255,77,77,.22);
+    }
+
+    .side{ padding: 18px; }
+    .side h2{
+      margin: 2px 0 10px;
+      font-size: 14px; font-weight: 750; letter-spacing:.2px;
+    }
+
+    .row{
+      display:grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      margin-bottom: 12px;
+    }
+    .field{
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--stroke);
+      border-radius: 16px;
+      padding: 12px;
+    }
+    .label{
+      font-size: 12px; color: var(--muted);
+      margin-bottom: 8px;
+      display:flex; justify-content:space-between; gap: 10px;
+    }
+
+    select, input[type="number"], input[type="range"]{
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.24);
+      color: var(--text);
+      padding: 10px 10px;
+      outline: none;
+      font-size: 14px;
+    }
+    input[type="range"]{ padding: 8px 0; }
+    input[type="color"]{
+      width: 100%;
+      height: 42px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.24);
+      padding: 6px;
+      cursor:pointer;
+    }
+
+    .toggle{
+      display:flex; align-items:center; justify-content:space-between;
+      gap: 12px; padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.05);
+      margin-top: 10px;
+    }
+    .toggle span{ color: var(--muted); font-size: 13px; }
+    .toggle input{ width: 46px; height: 24px; }
+
+    .stats{
+      margin-top: 12px;
+      display:grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    }
+    .stat{
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--stroke);
+      border-radius: 16px;
+      padding: 12px;
+    }
+    .stat .k{ font-size: 12px; color: var(--muted); }
+    .stat .v{ font-size: 20px; font-weight: 750; margin-top: 6px; }
+
+    .hint{
+      margin-top: 10px;
+      font-size: 12px;
+      color: rgba(255,255,255,.55);
+      line-height: 1.35;
+    }
+
+    /* Focus mode — klasa na body */
+    body.focusMode{ padding: 0; }
+    body.focusMode .side{ display:none; }
+    body.focusMode .wrap{
+      width: 100%;
+      height: 100%;
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+    body.focusMode .card.main{
+      border-radius: 0;
+      height: 100%;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+
+    /* PiP video must not be display:none */
+    #pipVideo{
+      position: fixed;
+      left: -9999px;
+      top: -9999px;
+      width: 1px;
+      height: 1px;
+      opacity: 0.0001;
+      pointer-events:none;
+    }
+
+    #pipCanvas{
+      position: fixed;
+      left: -9999px;
+      top: -9999px;
+      width: 1px;
+      height: 1px;
+      opacity: 0.0001;
+      pointer-events:none;
+    }
+  
+
+html {
+  overscroll-behavior: none;
+}
+
+body {
+  padding-top: max(22px, env(safe-area-inset-top));
+  padding-right: max(22px, env(safe-area-inset-right));
+  padding-bottom: max(22px, env(safe-area-inset-bottom));
+  padding-left: max(22px, env(safe-area-inset-left));
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+input, select, textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+button {
+  touch-action: manipulation;
+}
+
+.installBox button {
+  width: 100%;
+}

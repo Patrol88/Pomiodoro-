@@ -1,0 +1,10 @@
+{
+  "name": "Pomidor Pro",
+  "short_name": "Pomidor Pro",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "theme_color": "#0b0f14",
+  "background_color": "#0b0f14",
+  "orientation": "any"
+}
