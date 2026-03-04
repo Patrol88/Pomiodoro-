@@ -1,0 +1,1093 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pomidor Pro v2.2</title>
+  <style>
+    :root{
+      --bg0:#0b0f14;
+      --bg1:#0f1722;
+      --card: rgba(255,255,255,.06);
+      --stroke: rgba(255,255,255,.12);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.64);
+      --accent: #ff4d4d;
+      --shadow: 0 24px 70px rgba(0,0,0,.55);
+      --radius: 22px;
+      --ring: 320px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 700px at 20% 10%, rgba(255,77,77,.18), transparent 55%),
+        radial-gradient(900px 600px at 80% 20%, rgba(90,160,255,.12), transparent 60%),
+        radial-gradient(900px 700px at 50% 90%, rgba(170,90,255,.12), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 22px;
+    }
+
+    .wrap{
+      width:min(920px, 100%);
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 18px;
+    }
+    @media (max-width: 880px){
+      .wrap{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      overflow:hidden;
+    }
+
+    .main{ padding: 22px 22px 18px; }
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between;
+      gap: 12px; margin-bottom: 10px;
+    }
+    .brand{ display:flex; align-items:center; gap: 10px; }
+    .logoDot{
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(255,77,77,.18);
+    }
+    .title{
+      font-size: 15px; letter-spacing:.2px; font-weight: 650; margin:0; line-height: 1.1;
+    }
+    .subtitle{
+      margin:0; font-size: 12px; color: var(--muted); line-height: 1.1;
+    }
+
+    .chipRow{
+      display:flex; gap: 8px; flex-wrap:wrap; justify-content:flex-end;
+    }
+    .chip{
+      font-size: 12px; padding: 8px 10px; border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--stroke);
+      color: var(--muted);
+      user-select:none;
+    }
+    .chip strong{ color: var(--text); font-weight: 650; }
+
+    .dial{ display:grid; place-items:center; margin: 10px 0 8px; }
+    .dialBox{
+      width: var(--ring); height: var(--ring);
+      position:relative; display:grid; place-items:center;
+      border-radius: 999px;
+    }
+    canvas#dial{
+      width: var(--ring); height: var(--ring);
+      display:block; border-radius: 999px;
+    }
+    .center{
+      position:absolute; inset: 0;
+      display:grid; place-items:center;
+      text-align:center; padding: 22px;
+      pointer-events:none;
+    }
+    .phase{
+      font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 8px;
+    }
+    .time{
+      font-variant-numeric: tabular-nums;
+      font-size: 64px; font-weight: 750; line-height: 1.0;
+      letter-spacing: -0.02em;
+    }
+    .meta{
+      margin-top: 10px; font-size: 13px; color: var(--muted);
+      display:flex; align-items:center; justify-content:center;
+      gap: 10px; flex-wrap:wrap;
+    }
+    .pill{
+      padding: 7px 10px; border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--stroke);
+      color: var(--muted);
+    }
+
+    .controls{
+      display:flex; gap: 10px; flex-wrap:wrap;
+      justify-content:center; margin-top: 10px;
+    }
+    button{
+      appearance:none; border: 0; cursor:pointer;
+      border-radius: 14px; padding: 11px 14px;
+      font-weight: 650; letter-spacing:.2px;
+      color: var(--text);
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.10);
+      transition: transform .06s ease, background .2s ease, border-color .2s ease;
+      min-width: 112px;
+    }
+    button:hover{ background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.16); }
+    button:active{ transform: translateY(1px); }
+
+    .primary{
+      background: linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+      border-color: rgba(255,255,255,.14);
+      min-width: 170px;
+      position:relative; overflow:hidden;
+    }
+    .primary::before{
+      content:""; position:absolute; inset:-2px;
+      background: radial-gradient(400px 120px at 20% 20%, rgba(255,255,255,.24), transparent 60%);
+      opacity:.9; pointer-events:none;
+    }
+    .primary .dot{
+      width: 8px; height: 8px; border-radius: 999px;
+      background: var(--accent); display:inline-block;
+      margin-right: 8px; box-shadow: 0 0 0 6px rgba(255,77,77,.16);
+      vertical-align: middle;
+    }
+    .danger{
+      background: rgba(255,77,77,.12);
+      border-color: rgba(255,77,77,.22);
+    }
+
+    .side{ padding: 18px; }
+    .side h2{
+      margin: 2px 0 10px;
+      font-size: 14px; font-weight: 750; letter-spacing:.2px;
+    }
+
+    .row{
+      display:grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      margin-bottom: 12px;
+    }
+    .field{
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--stroke);
+      border-radius: 16px;
+      padding: 12px;
+    }
+    .label{
+      font-size: 12px; color: var(--muted);
+      margin-bottom: 8px;
+      display:flex; justify-content:space-between; gap: 10px;
+    }
+
+    select, input[type="number"], input[type="range"]{
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.24);
+      color: var(--text);
+      padding: 10px 10px;
+      outline: none;
+      font-size: 14px;
+    }
+    input[type="range"]{ padding: 8px 0; }
+    input[type="color"]{
+      width: 100%;
+      height: 42px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.24);
+      padding: 6px;
+      cursor:pointer;
+    }
+
+    .toggle{
+      display:flex; align-items:center; justify-content:space-between;
+      gap: 12px; padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.05);
+      margin-top: 10px;
+    }
+    .toggle span{ color: var(--muted); font-size: 13px; }
+    .toggle input{ width: 46px; height: 24px; }
+
+    .stats{
+      margin-top: 12px;
+      display:grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    }
+    .stat{
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--stroke);
+      border-radius: 16px;
+      padding: 12px;
+    }
+    .stat .k{ font-size: 12px; color: var(--muted); }
+    .stat .v{ font-size: 20px; font-weight: 750; margin-top: 6px; }
+
+    .hint{
+      margin-top: 10px;
+      font-size: 12px;
+      color: rgba(255,255,255,.55);
+      line-height: 1.35;
+    }
+
+    /* Focus mode — klasa na body */
+    body.focusMode{ padding: 0; }
+    body.focusMode .side{ display:none; }
+    body.focusMode .wrap{
+      width: 100%;
+      height: 100%;
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+    body.focusMode .card.main{
+      border-radius: 0;
+      height: 100%;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+
+    /* PiP video must not be display:none */
+    #pipVideo{
+      position: fixed;
+      left: -9999px;
+      top: -9999px;
+      width: 1px;
+      height: 1px;
+      opacity: 0.0001;
+      pointer-events:none;
+    }
+
+    #pipCanvas{
+      position: fixed;
+      left: -9999px;
+      top: -9999px;
+      width: 1px;
+      height: 1px;
+      opacity: 0.0001;
+      pointer-events:none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap" id="root">
+    <section class="card main">
+      <div class="topbar">
+        <div class="brand">
+          <div class="logoDot"></div>
+          <div>
+            <p class="title">Pomidor Pro</p>
+            <p class="subtitle">focus timer, sensownie zrobiony</p>
+          </div>
+        </div>
+        <div class="chipRow">
+          <div class="chip"><strong id="chipMode">Pomodoro</strong></div>
+          <div class="chip"><span id="chipPlan">25/5/15 • long co 4</span></div>
+        </div>
+      </div>
+
+      <div class="dial">
+        <div class="dialBox">
+          <canvas id="dial" width="720" height="720"></canvas>
+          <div class="center">
+            <div>
+              <div class="phase" id="phaseLabel">WORK</div>
+              <div class="time" id="time">25:00</div>
+              <div class="meta">
+                <span class="pill" id="metaLeft">Pozostało: 25:00</span>
+                <span class="pill" id="metaRight">Sesje dziś: <strong id="sessionsToday" style="color:var(--text)">0</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button type="button" class="primary" id="btnStartPause"><span class="dot"></span><span id="btnStartPauseTxt">Start</span></button>
+          <button type="button" id="btnReset" class="danger">Reset</button>
+          <button type="button" id="btnSkip">Skip</button>
+          <button type="button" id="btnFocus">Focus</button>
+          <button type="button" id="btnPiP">PiP</button>
+        </div>
+
+        <div class="hint">
+          Skróty: <strong>Spacja</strong> start/pause • <strong>R</strong> reset • <strong>N</strong> skip • <strong>F</strong> focus • <strong>P</strong> PiP
+        </div>
+      </div>
+    </section>
+
+    <aside class="card side">
+      <h2>Ustawienia</h2>
+
+      <div class="row">
+        <div class="field">
+          <div class="label"><span>Tryb</span></div>
+          <select id="mode">
+            <option value="pomodoro">Pomodoro (cykl)</option>
+            <option value="countdown">Odliczanie</option>
+            <option value="countup">Timer w górę</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <div class="label"><span>Akcent</span></div>
+          <input id="accent" type="color" value="#ff4d4d" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <div class="label"><span>Praca (min)</span></div>
+          <input id="workMin" type="number" min="1" max="180" value="25" />
+        </div>
+        <div class="field">
+          <div class="label"><span>Krótka przerwa (min)</span></div>
+          <input id="shortMin" type="number" min="1" max="60" value="5" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <div class="label"><span>Długa przerwa (min)</span></div>
+          <input id="longMin" type="number" min="1" max="90" value="15" />
+        </div>
+        <div class="field">
+          <div class="label"><span>Długa co (sesji)</span></div>
+          <input id="longEvery" type="number" min="2" max="10" value="4" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <div class="label"><span>Countdown (min)</span></div>
+          <input id="countdownMin" type="number" min="1" max="999" value="25" />
+        </div>
+        <div class="field">
+          <div class="label"><span>Target (min)</span></div>
+          <input id="countupTargetMin" type="number" min="0" max="999" value="0" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <div class="label">
+            <span>PiP – widok</span>
+            <span style="color:var(--muted)">restart PiP po zmianie</span>
+          </div>
+          <select id="pipView">
+            <option value="ring">Ring (jak w apce)</option>
+            <option value="digits">Cyfry (minimal)</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="label"><span>PiP – kolor cyfr</span></div>
+          <input id="pipDigitsColor" type="color" value="#ffffff" />
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:12px;">
+        <div class="label">
+          <span>Głośność beep</span>
+          <span id="volVal" style="color:var(--muted)">60%</span>
+        </div>
+        <input id="volume" type="range" min="0" max="100" value="60" />
+        <div class="toggle">
+          <span>Auto-start następnej fazy</span>
+          <input id="autoStart" type="checkbox" checked />
+        </div>
+        <div class="toggle">
+          <span>Powiadomienia systemowe</span>
+          <input id="notify" type="checkbox" />
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="k">Sesje (praca) dziś</div>
+          <div class="v" id="statSessions">0</div>
+        </div>
+        <div class="stat">
+          <div class="k">Minuty focus dziś</div>
+          <div class="v" id="statMinutes">0</div>
+        </div>
+      </div>
+
+      <div class="hint">
+        Jeśli masz zaznaczone powiadomienia i permission jest „default”, poproszę o zgodę przy pierwszym starcie (user gesture),
+        a nie na koniec sesji.
+      </div>
+    </aside>
+  </div>
+
+  <video id="pipVideo" muted playsinline></video>
+  <canvas id="pipCanvas" width="800" height="450"></canvas>
+
+<script>
+(() => {
+  const STORAGE_KEY = "pomidor_pro_v2_2";
+  const todayKey = () => {
+    const d = new Date();
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    return `${d.getFullYear()}-${mm}-${dd}`;
+  };
+
+  const defaults = {
+    mode: "pomodoro",
+    accent: "#ff4d4d",
+    workMin: 25,
+    shortMin: 5,
+    longMin: 15,
+    longEvery: 4,
+    countdownMin: 25,
+    countupTargetMin: 0,
+    volume: 60,
+    autoStart: true,
+    notify: false,
+    pipView: "ring",
+    pipDigitsColor: "#ffffff",
+    stats: {}
+  };
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return structuredClone(defaults);
+      const parsed = JSON.parse(raw);
+      return { ...structuredClone(defaults), ...parsed, stats: { ...(parsed.stats || {}) } };
+    } catch {
+      return structuredClone(defaults);
+    }
+  }
+  function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg)); }
+  let cfg = load();
+
+  const el = {
+    root: document.getElementById("root"),
+    chipMode: document.getElementById("chipMode"),
+    chipPlan: document.getElementById("chipPlan"),
+
+    canvas: document.getElementById("dial"),
+    phaseLabel: document.getElementById("phaseLabel"),
+    time: document.getElementById("time"),
+    metaLeft: document.getElementById("metaLeft"),
+    sessionsToday: document.getElementById("sessionsToday"),
+
+    btnStartPause: document.getElementById("btnStartPause"),
+    btnStartPauseTxt: document.getElementById("btnStartPauseTxt"),
+    btnReset: document.getElementById("btnReset"),
+    btnSkip: document.getElementById("btnSkip"),
+    btnFocus: document.getElementById("btnFocus"),
+    btnPiP: document.getElementById("btnPiP"),
+
+    mode: document.getElementById("mode"),
+    accent: document.getElementById("accent"),
+    workMin: document.getElementById("workMin"),
+    shortMin: document.getElementById("shortMin"),
+    longMin: document.getElementById("longMin"),
+    longEvery: document.getElementById("longEvery"),
+    countdownMin: document.getElementById("countdownMin"),
+    countupTargetMin: document.getElementById("countupTargetMin"),
+    volume: document.getElementById("volume"),
+    volVal: document.getElementById("volVal"),
+    autoStart: document.getElementById("autoStart"),
+    notify: document.getElementById("notify"),
+
+    pipView: document.getElementById("pipView"),
+    pipDigitsColor: document.getElementById("pipDigitsColor"),
+
+    statSessions: document.getElementById("statSessions"),
+    statMinutes: document.getElementById("statMinutes"),
+
+    pipVideo: document.getElementById("pipVideo"),
+    pipCanvas: document.getElementById("pipCanvas"),
+  };
+
+  const state = {
+    running: false,
+    lastNow: 0,
+
+    duration: 25*60,
+    remaining: 25*60,
+
+    elapsed: 0,
+    target: 0,
+
+    phaseType: "work",
+    phaseName: "WORK",
+
+    lastShownSec: null,
+    spaceDown: false
+  };
+
+  function ensureTodayStats() {
+    const k = todayKey();
+    if (!cfg.stats[k]) cfg.stats[k] = { sessions: 0, focusMinutes: 0 };
+    return cfg.stats[k];
+  }
+
+  function setAccent(hex) {
+    document.documentElement.style.setProperty("--accent", hex);
+  }
+
+  function fmt(sec) {
+    sec = Math.max(0, Math.floor(sec));
+    const m = Math.floor(sec/60);
+    const s = sec % 60;
+    if (m >= 100) {
+      const h = Math.floor(m/60);
+      const mm = m % 60;
+      return `${String(h).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+    return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+
+  // ------- Audio unlock (fix: blocked AudioContext) -------
+  let audioCtx;
+  async function ensureAudioUnlocked() {
+    try {
+      audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") await audioCtx.resume();
+    } catch { /* ignore */ }
+  }
+
+  function beep() {
+    const vol = (Number(cfg.volume) || 0) / 100;
+    if (vol <= 0) return;
+
+    if (!audioCtx) return; // jeśli ktoś nigdy nie kliknął start - nie próbujemy odpalać (i tak by zablokowało)
+    try {
+      const ctx = audioCtx;
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = "sine";
+      o.frequency.value = 880;
+      g.gain.value = vol * 0.08;
+      o.connect(g); g.connect(ctx.destination);
+      const t = ctx.currentTime;
+      o.start(t); o.stop(t + 0.18);
+
+      const o2 = ctx.createOscillator();
+      const g2 = ctx.createGain();
+      o2.type = "sine";
+      o2.frequency.value = 660;
+      g2.gain.value = vol * 0.06;
+      o2.connect(g2); g2.connect(ctx.destination);
+      o2.start(t + 0.22); o2.stop(t + 0.34);
+    } catch { /* ignore */ }
+  }
+
+  async function maybeRequestNotificationsOnGesture() {
+    if (!cfg.notify) return;
+    if (!("Notification" in window)) return;
+    if (Notification.permission === "default") {
+      try { await Notification.requestPermission(); } catch { /* ignore */ }
+    }
+  }
+
+  async function notify(title, body) {
+    if (!cfg.notify) return;
+    if (!("Notification" in window)) return;
+    if (Notification.permission === "granted") new Notification(title, { body });
+  }
+
+  // ------- Canvas dial -------
+  const ctx = el.canvas.getContext("2d");
+  function drawDial(progress) {
+    const w = el.canvas.width, h = el.canvas.height;
+    const cx = w/2, cy = h/2;
+    const r = Math.min(w,h)*0.36;
+
+    ctx.clearRect(0,0,w,h);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, r+38, 0, Math.PI*2);
+    ctx.fillStyle = "rgba(255,255,255,0.02)";
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.lineWidth = 18;
+    ctx.strokeStyle = "rgba(255,255,255,0.10)";
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI*2);
+    ctx.stroke();
+    ctx.restore();
+
+    const start = -Math.PI/2;
+    const end = start + Math.PI*2 * Math.min(1, Math.max(0, progress));
+
+    ctx.save();
+    ctx.lineWidth = 18;
+    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#ff4d4d";
+    ctx.shadowColor = ctx.strokeStyle;
+    ctx.shadowBlur = 22;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, start, end, false);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.save();
+    const grd = ctx.createRadialGradient(cx, cy, r*0.2, cx, cy, r*1.35);
+    grd.addColorStop(0, "rgba(0,0,0,0)");
+    grd.addColorStop(1, "rgba(0,0,0,0.35)");
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r+56, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // ------- PiP digits canvas -------
+  const pipCtx = el.pipCanvas.getContext("2d");
+  function roundRect(c, x, y, w, h, r){
+    const rr = Math.min(r, w/2, h/2);
+    c.beginPath();
+    c.moveTo(x+rr, y);
+    c.arcTo(x+w, y, x+w, y+h, rr);
+    c.arcTo(x+w, y+h, x, y+h, rr);
+    c.arcTo(x, y+h, x, y, rr);
+    c.arcTo(x, y, x+w, y, rr);
+    c.closePath();
+  }
+
+  function drawPipDigits(displayText, phaseText, subText){
+    const w = el.pipCanvas.width, h = el.pipCanvas.height;
+    pipCtx.clearRect(0,0,w,h);
+
+    const bg = pipCtx.createLinearGradient(0,0,w,h);
+    bg.addColorStop(0, "rgba(10,14,20,0.98)");
+    bg.addColorStop(1, "rgba(18,24,34,0.98)");
+    pipCtx.fillStyle = bg;
+    pipCtx.fillRect(0,0,w,h);
+
+    pipCtx.save();
+    pipCtx.globalAlpha = 0.18;
+    pipCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#ff4d4d";
+    pipCtx.beginPath();
+    pipCtx.ellipse(w*0.25, h*0.20, w*0.35, h*0.28, 0, 0, Math.PI*2);
+    pipCtx.fill();
+    pipCtx.restore();
+
+    pipCtx.save();
+    pipCtx.globalAlpha = 0.92;
+    pipCtx.fillStyle = "rgba(255,255,255,0.06)";
+    pipCtx.strokeStyle = "rgba(255,255,255,0.10)";
+    pipCtx.lineWidth = 2;
+    roundRect(pipCtx, 44, 44, w-88, h-88, 28);
+    pipCtx.fill();
+    pipCtx.stroke();
+    pipCtx.restore();
+
+    const digitsColor = cfg.pipDigitsColor || "#ffffff";
+
+    pipCtx.save();
+    pipCtx.fillStyle = "rgba(255,255,255,0.62)";
+    pipCtx.font = "700 26px ui-sans-serif, system-ui";
+    pipCtx.textAlign = "center";
+    pipCtx.fillText(phaseText, w/2, 120);
+    pipCtx.restore();
+
+    pipCtx.save();
+    pipCtx.fillStyle = digitsColor;
+    pipCtx.font = "800 120px ui-sans-serif, system-ui";
+    pipCtx.textAlign = "center";
+    pipCtx.textBaseline = "middle";
+    pipCtx.fillText(displayText, w/2, h/2);
+    pipCtx.restore();
+
+    pipCtx.save();
+    pipCtx.fillStyle = "rgba(255,255,255,0.62)";
+    pipCtx.font = "650 22px ui-sans-serif, system-ui";
+    pipCtx.textAlign = "center";
+    pipCtx.fillText(subText, w/2, h - 96);
+    pipCtx.restore();
+  }
+
+  function applyModeUI() {
+    el.chipMode.textContent =
+      cfg.mode === "pomodoro" ? "Pomodoro" :
+      cfg.mode === "countdown" ? "Odliczanie" : "Timer";
+
+    el.chipPlan.textContent = `${cfg.workMin}/${cfg.shortMin}/${cfg.longMin} • long co ${cfg.longEvery}`;
+
+    el.mode.value = cfg.mode;
+    el.accent.value = cfg.accent;
+    el.workMin.value = cfg.workMin;
+    el.shortMin.value = cfg.shortMin;
+    el.longMin.value = cfg.longMin;
+    el.longEvery.value = cfg.longEvery;
+    el.countdownMin.value = cfg.countdownMin;
+    el.countupTargetMin.value = cfg.countupTargetMin;
+    el.volume.value = cfg.volume;
+    el.volVal.textContent = `${cfg.volume}%`;
+    el.autoStart.checked = !!cfg.autoStart;
+    el.notify.checked = !!cfg.notify;
+    el.pipView.value = cfg.pipView || "ring";
+    el.pipDigitsColor.value = cfg.pipDigitsColor || "#ffffff";
+
+    setAccent(cfg.accent);
+  }
+
+  function setPhase(type, durationSec, name) {
+    state.phaseType = type;
+    state.phaseName = name;
+    state.duration = Math.max(1, Math.floor(durationSec));
+    state.remaining = state.duration;
+    state.elapsed = 0;
+    state.lastShownSec = null;
+
+    el.phaseLabel.textContent = name;
+    el.metaLeft.textContent = (cfg.mode === "countup") ? `Czas: 00:00` : `Pozostało: ${fmt(state.remaining)}`;
+
+    updateStatsUI();
+    render(true);
+  }
+
+  function isIdle() {
+    if (cfg.mode === "countup") return state.elapsed <= 0.0001;
+    return Math.abs(state.remaining - state.duration) < 0.25;
+  }
+
+  function startIfNotRunning() {
+    if (state.running) return;
+    // unlock audio + notifications on a user gesture
+    ensureAudioUnlocked();
+    maybeRequestNotificationsOnGesture();
+
+    state.running = true;
+    state.lastNow = performance.now();
+    el.btnStartPauseTxt.textContent = "Pause";
+    requestAnimationFrame(loop);
+  }
+
+  function pauseIfRunning() {
+    state.running = false;
+    el.btnStartPauseTxt.textContent = "Start";
+  }
+
+  function toggleStartPause() {
+    if (!state.running) startIfNotRunning();
+    else pauseIfRunning();
+  }
+
+  function resetPhaseFromConfig() {
+    pauseIfRunning();
+    if (cfg.mode === "pomodoro") {
+      setPhase("work", cfg.workMin*60, "WORK");
+    } else if (cfg.mode === "countdown") {
+      setPhase("countdown", cfg.countdownMin*60, "COUNTDOWN");
+    } else {
+      state.target = Math.max(0, Number(cfg.countupTargetMin) || 0) * 60;
+      setPhase("countup", Math.max(1, state.target || 3600), "TIMER");
+      state.elapsed = 0;
+    }
+  }
+
+  function nextPomodoroPhase() {
+    const stats = ensureTodayStats();
+    if (state.phaseType === "work") {
+      stats.sessions += 1;
+      stats.focusMinutes += cfg.workMin;
+      save();
+      updateStatsUI();
+
+      const shouldLong = (stats.sessions % Math.max(2, Number(cfg.longEvery)||4) === 0);
+      if (shouldLong) setPhase("long", cfg.longMin*60, "LONG BREAK");
+      else setPhase("short", cfg.shortMin*60, "SHORT BREAK");
+    } else {
+      setPhase("work", cfg.workMin*60, "WORK");
+    }
+  }
+
+  function finishPhase() {
+    beep();
+
+    if (cfg.mode === "pomodoro") {
+      notify("Pomidor Pro", state.phaseType === "work" ? "Koniec pracy. Czas na przerwę." : "Koniec przerwy. Wracamy do roboty.");
+      nextPomodoroPhase();
+      if (!cfg.autoStart) pauseIfRunning();
+      return;
+    }
+
+    if (cfg.mode === "countdown") {
+      notify("Pomidor Pro", "Countdown zakończony.");
+      pauseIfRunning();
+      state.remaining = 0;
+      render(true);
+      return;
+    }
+
+    if (cfg.mode === "countup") {
+      notify("Pomidor Pro", state.target > 0 ? "Target osiągnięty." : "Timer.");
+      pauseIfRunning();
+      render(true);
+      return;
+    }
+  }
+
+  function updateStatsUI() {
+    const stats = ensureTodayStats();
+    el.sessionsToday.textContent = stats.sessions;
+    el.statSessions.textContent = stats.sessions;
+    el.statMinutes.textContent = stats.focusMinutes;
+  }
+
+  function render(force=false) {
+    let displaySec;
+    let progress;
+
+    if (cfg.mode === "countup") {
+      displaySec = state.elapsed;
+      if (state.target > 0) progress = Math.min(1, state.elapsed / state.target);
+      else progress = (state.elapsed % 3600) / 3600;
+      el.metaLeft.textContent = `Czas: ${fmt(displaySec)}`;
+    } else {
+      displaySec = state.remaining;
+      progress = 1 - (state.remaining / state.duration);
+      el.metaLeft.textContent = `Pozostało: ${fmt(state.remaining)}`;
+    }
+
+    const shown = Math.floor(displaySec);
+    if (force || state.lastShownSec !== shown) {
+      el.time.textContent = fmt(displaySec);
+      state.lastShownSec = shown;
+    }
+
+    drawDial(progress);
+
+    if ((cfg.pipView || "ring") === "digits") {
+      const display = fmt(displaySec);
+      const phase = (cfg.mode === "pomodoro")
+        ? (state.phaseType === "work" ? "WORK" : "BREAK")
+        : (cfg.mode === "countdown" ? "COUNTDOWN" : "TIMER");
+      const sub = cfg.mode === "countup"
+        ? (state.target > 0 ? `Target: ${fmt(state.target)}` : "Brak targetu")
+        : `Tryb: ${cfg.mode === "pomodoro" ? (state.phaseType === "work" ? "Focus" : "Break") : "Countdown"}`;
+      drawPipDigits(display, phase, sub);
+    }
+  }
+
+  function loop(now) {
+    if (!state.running) return;
+
+    const dt = Math.min(0.2, (now - state.lastNow) / 1000);
+    state.lastNow = now;
+
+    if (cfg.mode === "countup") {
+      state.elapsed += dt;
+      if (state.target > 0 && state.elapsed >= state.target) {
+        state.elapsed = state.target;
+        finishPhase();
+        render(true);
+        return;
+      }
+    } else {
+      state.remaining -= dt;
+      if (state.remaining <= 0) {
+        state.remaining = 0;
+        finishPhase();
+        render(true);
+        if (state.running) requestAnimationFrame(loop);
+        return;
+      }
+    }
+
+    render(false);
+    requestAnimationFrame(loop);
+  }
+
+  async function togglePiP() {
+    if (!document.pictureInPictureEnabled) {
+      alert("PiP: przeglądarka nie wspiera.");
+      return;
+    }
+    try {
+      if (document.pictureInPictureElement) {
+        await document.exitPictureInPicture();
+        return;
+      }
+      const view = cfg.pipView || "ring";
+      const srcCanvas = (view === "digits") ? el.pipCanvas : el.canvas;
+
+      if (!srcCanvas.captureStream) {
+        alert("PiP: brak wsparcia canvas.captureStream(). Spróbuj Chrome/Edge.");
+        return;
+      }
+
+      render(true);
+
+      const stream = srcCanvas.captureStream(30);
+      el.pipVideo.srcObject = stream;
+      await el.pipVideo.play();
+      await el.pipVideo.requestPictureInPicture();
+    } catch (e) {
+      console.warn(e);
+      alert("PiP nie wstał. Najczęściej: blokada uprawnień albo autoplay.");
+    }
+  }
+
+  async function toggleFocus() {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+        document.body.classList.add("focusMode");
+      } else {
+        await document.exitFullscreen();
+        document.body.classList.remove("focusMode");
+      }
+    } catch {
+      document.body.classList.toggle("focusMode");
+    }
+  }
+
+  function bind() {
+    el.btnStartPause.addEventListener("click", () => toggleStartPause());
+    el.btnReset.addEventListener("click", () => resetPhaseFromConfig());
+
+    el.btnSkip.addEventListener("click", () => {
+      if (cfg.mode === "pomodoro") {
+        finishPhase();
+      } else if (cfg.mode === "countdown") {
+        state.remaining = 0;
+        finishPhase();
+      } else {
+        // FIX: countup skip without target resets elapsed
+        if ((Number(cfg.countupTargetMin) || 0) <= 0) {
+          state.elapsed = 0;
+          render(true);
+        } else {
+          state.target = Math.max(0, Number(cfg.countupTargetMin) || 0) * 60;
+          state.elapsed = state.target;
+          finishPhase();
+        }
+      }
+    });
+
+    el.btnFocus.addEventListener("click", toggleFocus);
+    el.btnPiP.addEventListener("click", togglePiP);
+
+    // MODE change -> reset (intended)
+    el.mode.addEventListener("change", () => {
+      cfg.mode = el.mode.value;
+      save();
+      applyModeUI();
+      resetPhaseFromConfig();
+    });
+
+    el.accent.addEventListener("input", () => {
+      cfg.accent = el.accent.value;
+      setAccent(cfg.accent);
+      save();
+      render(true);
+    });
+
+    // Settings changes (FIX: no aggressive reset; apply only if idle)
+    function updateCfgNumber(id) {
+      cfg[id] = Number(el[id].value) || cfg[id];
+      save();
+      applyModeUI();
+      if (!state.running && isIdle()) {
+        // only reflect immediately if user hasn't progressed current phase
+        resetPhaseFromConfig();
+      }
+    }
+
+    ["workMin","shortMin","longMin","longEvery","countdownMin","countupTargetMin"].forEach(id => {
+      el[id].addEventListener("change", () => updateCfgNumber(id));
+    });
+
+    el.pipView.addEventListener("change", () => {
+      cfg.pipView = el.pipView.value;
+      save();
+      render(true);
+    });
+
+    el.pipDigitsColor.addEventListener("input", () => {
+      cfg.pipDigitsColor = el.pipDigitsColor.value;
+      save();
+      render(true);
+    });
+
+    el.volume.addEventListener("input", () => {
+      cfg.volume = Number(el.volume.value) || 0;
+      el.volVal.textContent = `${cfg.volume}%`;
+      save();
+    });
+
+    el.autoStart.addEventListener("change", () => {
+      cfg.autoStart = el.autoStart.checked;
+      save();
+    });
+
+    // Notify checkbox: request permission on gesture here
+    el.notify.addEventListener("change", async () => {
+      cfg.notify = el.notify.checked;
+      save();
+      await maybeRequestNotificationsOnGesture();
+    });
+
+    // Global gesture to unlock audio (safe)
+    document.addEventListener("pointerdown", ensureAudioUnlocked, { once: true });
+
+    // KEYBOARD (FIX: no click simulation; block default click on keyup)
+    const keyHandler = (e) => {
+      const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : "";
+      const typing = tag === "input" || tag === "select" || tag === "textarea";
+      if (typing) return;
+
+      if (e.code === "Space") {
+        e.preventDefault();
+        if (state.spaceDown) return;
+        state.spaceDown = true;
+        toggleStartPause();
+      } else if (e.key.toLowerCase() === "r") {
+        resetPhaseFromConfig();
+      } else if (e.key.toLowerCase() === "n") {
+        el.btnSkip.click();
+      } else if (e.key.toLowerCase() === "f") {
+        toggleFocus();
+      } else if (e.key.toLowerCase() === "p") {
+        togglePiP();
+      }
+    };
+
+    const keyUpHandler = (e) => {
+      if (e.code === "Space") {
+        e.preventDefault();
+        state.spaceDown = false;
+      }
+    };
+
+    window.addEventListener("keydown", keyHandler, { capture: true });
+    window.addEventListener("keyup", keyUpHandler, { capture: true });
+
+    document.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement) document.body.classList.remove("focusMode");
+    });
+  }
+
+  function init() {
+    ensureTodayStats();
+    applyModeUI();
+    updateStatsUI();
+    resetPhaseFromConfig();
+    bind();
+    render(true);
+
+    // if notify is ON but permission is default, don't prompt now; we'll prompt on Start (gesture)
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
